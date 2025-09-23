@@ -1,0 +1,41 @@
+# Agentic RAG: AI Assistant for Document Search using Agents
+
+A Proof of Concept (PoC) for an intelligent document search assistant that uses agentic workflows to break down queries, search documents, summarize context, and generate grounded answers with proper citations.
+
+## Features
+
+- **Intelligent Document Search**: Vector-based search using Chroma DB
+- **Agentic Workflow**: Breaks down queries into search → summarize → answer steps
+- **Grounded Responses**: Answers include citations to source documents
+- **Streamlit Web Interface**: User-friendly web UI for interaction
+- **Cerebras Integration**: Uses Cerebras gpt-oss-120b model via LangChain
+- **Multiple Document Formats**: Supports PDF and text files
+
+## Tech Stack
+
+- Python 3.10+
+- LangChain + langchain-cerebras
+- Chroma DB (vector database)
+- Streamlit (web interface)
+- HuggingFace Embeddings
+
+## Setup Instructions
+
+### 1. Prerequisites
+
+- Python 3.10 or higher
+- Cerebras API key
+
+### 2. Installation
+
+```bash
+# Clone or create the project directory
+mkdir agentic-rag-poc
+cd agentic-rag-poc
+
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
