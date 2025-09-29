@@ -6,10 +6,10 @@ load_dotenv()
 class Config:
     """Configuration settings for the RAG system"""
     
-    # Cerebras API configuration (OpenAI-compatible endpoint)
+    # Cerebras API configuration
     CEREBRAS_API_KEY = os.getenv("CEREBRAS_API_KEY")
     
-    # Cerebras API endpoint (OpenAI-compatible)
+    # Cerebras API endpoint
     CEREBRAS_API_BASE = "https://api.cerebras.ai/v1"
     
     # Model configuration
@@ -27,7 +27,7 @@ class Config:
     # RAG configuration
     MAX_CONTEXT_LENGTH = 4000
     TEMPERATURE = 0.1
-    RETRIEVAL_COUNT = 5  # Number of documents to retrieve
+    RETRIEVAL_COUNT = 5
     
     @classmethod
     def validate_config(cls):
