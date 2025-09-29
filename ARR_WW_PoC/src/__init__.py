@@ -1,21 +1,21 @@
 """
-Agentic RAG Document Search System
+RAG Document Search System
 
-A Proof of Concept for intelligent document search using agentic workflows.
+A standard Retrieval-Augmented Generation system for document search.
 """
 
 __version__ = "1.0.0"
 __author__ = "AI Assistant"
-__description__ = "Agentic RAG: AI Assistant for Document Search using Agents"
+__description__ = "RAG: Document Search using Retrieval-Augmented Generation"
 
 from .config import config
 from .vectorstore import VectorStoreManager
-from .agent import DocumentSearchAgent
+from .rag_engine import RAGEngine
 from .ui import StreamlitUI
 
 __all__ = [
     'config',
     'VectorStoreManager', 
-    'DocumentSearchAgent',
+    'RAGEngine',
     'StreamlitUI'
 ]
