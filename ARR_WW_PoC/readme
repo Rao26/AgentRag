@@ -1,7 +1,4 @@
-# Agentic RAG: AI Assistant for Document Search using Agents
-
-A Proof of Concept (PoC) for an intelligent document search assistant that uses agentic workflows to break down queries, search documents, summarize context, and generate grounded answers with proper citations.
-
+# RAG: AI Assistant for Document Search using Agents
 ## Features
 
 - **Intelligent Document Search**: Vector-based search using Chroma DB
