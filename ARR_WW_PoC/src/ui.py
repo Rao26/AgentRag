@@ -6,58 +6,39 @@ import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 class StreamlitUI:
-    """Streamlit interface for the Document Search Assistant"""
+    """Streamlit interface for the RAG Document Search Assistant"""
     
     def __init__(self):
         self.setup_page()
-        self.vector_store_manager = None
-        self.agent = None
+        self.rag_engine = None
         
     def setup_page(self):
         """Configure the Streamlit page"""
         st.set_page_config(
-            page_title="Agentic RAG Document Search",
+            page_title="RAG Document Search",
             page_icon="🔍",
             layout="wide",
             initial_sidebar_state="expanded"
         )
         
-        st.title("🔍 Agentic RAG Document Search Assistant")
+        st.title("🔍 RAG Document Search Assistant")
         st.markdown("""
-        This intelligent assistant can search through your documents, break down complex queries, 
-        and provide well-grounded answers with proper citations.
+        This intelligent assistant can search through your documents and provide 
+        well-grounded answers with proper citations using Retrieval-Augmented Generation.
         """)
     
     def initialize_system(self):
-        """Initialize the vector store and agent"""
+        """Initialize the RAG engine"""
         try:
-            # Import inside the function to avoid circular imports
             from src.config import config
-            from src.vectorstore import VectorStoreManager
-            from src.agent import DocumentSearchAgent
+            from src.rag_engine import RAGEngine
             
             # Validate config first
             config.validate_config()
             
-            with st.spinner("Initializing system..."):
-                self.vector_store_manager = VectorStoreManager()
-                
-                # Try to load existing vector store, else create new one
-                try:
-                    self.vector_store_manager.load_existing_vector_store()
-                    st.success("✅ Loaded existing vector store")
-                except FileNotFoundError:
-                    st.info("📁 No existing vector store found. Creating new one from documents...")
-                    documents = self.vector_store_manager.load_documents()
-                    if documents:
-                        self.vector_store_manager.create_vector_store(documents)
-                        st.success(f"✅ Created vector store with {len(documents)} documents")
-                    else:
-                        st.warning("⚠️ No documents found in data directory. Please add some PDF or text files.")
-                        return False
-                
-                self.agent = DocumentSearchAgent(self.vector_store_manager)
-                st.success("✅ Agent initialized successfully")
+            with st.spinner("Initializing RAG system..."):
+                self.rag_engine = RAGEngine()
+                st.success("✅ RAG system initialized successfully")
                 return True
                 
         except ValueError as e:
@@ -73,24 +54,23 @@ class StreamlitUI:
         with st.sidebar:
             st.header("📊 System Information")
             
-            if self.vector_store_manager and self.vector_store_manager.vector_store:
+            if self.rag_engine and self.rag_engine.vector_store_manager.vector_store:
                 try:
-                    # Get document count from vector store
-                    docs = self.vector_store_manager.vector_store.get()
+                    docs = self.rag_engine.vector_store_manager.vector_store.get()
                     doc_count = len(docs['documents']) if docs and 'documents' in docs else 0
-                    st.metric("Chunks in Knowledge Base", doc_count)
+                    st.metric("Document Chunks", doc_count)
                 except Exception as e:
-                    st.metric("Chunks in Knowledge Base", "Unknown")
+                    st.metric("Document Chunks", "Unknown")
             
             st.header("⚙️ Settings")
-            st.info("Using Cerebras Llama-3.3-70b model")
+            st.info("Using RAG with Cerebras Llama-3.3-70b")
             
             st.header("💡 Usage Tips")
             st.markdown("""
             - Ask specific questions for best results
-            - The agent will automatically search, summarize, and answer
             - Answers include citations to source documents
-            - Complex queries are broken down into subtasks
+            - System retrieves relevant documents and generates answers
+            - Supports PDF and text documents
             """)
             
             # Clear conversation button
@@ -106,7 +86,7 @@ class StreamlitUI:
         # Initialize chat history in session state
         if "messages" not in st.session_state:
             st.session_state.messages = [
-                {"role": "assistant", "content": "Hello! I'm your document search assistant. Ask me anything about the documents in your knowledge base."}
+                {"role": "assistant", "content": "Hello! I'm your RAG document search assistant. Ask me anything about the documents in your knowledge base."}
             ]
         
         # Display chat messages
@@ -121,15 +101,21 @@ class StreamlitUI:
             with st.chat_message("user"):
                 st.markdown(prompt)
             
-            # Generate agent response
+            # Generate RAG response
             with st.chat_message("assistant"):
                 with st.spinner("Searching documents and generating answer..."):
                     try:
-                        result = self.agent.process_query(prompt)
+                        result = self.rag_engine.process_query(prompt)
                         
                         if result["success"]:
                             # Display answer
                             st.markdown(result["answer"])
+                            
+                            # Display sources if available
+                            if result["sources"]:
+                                with st.expander("📚 Source References"):
+                                    for source in result["sources"]:
+                                        st.write(f"• {source}")
                             
                             # Add assistant response to chat history
                             st.session_state.messages.append({
