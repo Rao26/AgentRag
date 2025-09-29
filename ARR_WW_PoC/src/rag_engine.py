@@ -1,32 +1,24 @@
 from typing import Dict, Any, List
-from langchain_openai import ChatOpenAI
-from langchain.schema import HumanMessage, SystemMessage
-from langchain.prompts import ChatPromptTemplate
+import requests
+import json
+from langchain.schema import Document
 
 from .config import config
 from .vectorstore import VectorStoreManager
 
 class RAGEngine:
-    """Standard RAG engine for document search and question answering"""
+    """Standard RAG engine using direct Cerebras API"""
     
     def __init__(self):
         self.vector_store_manager = VectorStoreManager()
-        self.llm = ChatOpenAI(
-            model=config.MODEL_NAME,
-            temperature=config.TEMPERATURE,
-            openai_api_key=config.CEREBRAS_API_KEY,
-            openai_api_base=config.CEREBRAS_API_BASE,
-            max_tokens=2000
-        )
+        self.conversation_history = []
         
         # Initialize vector store
         self._initialize_vector_store()
-        
-        # Conversation history
-        self.conversation_history = []
     
     def _initialize_vector_store(self):
         """Initialize or load the vector store"""
+        import os
         try:
             if os.path.exists(config.CHROMA_PERSIST_DIR):
                 self.vector_store_manager.load_existing_vector_store()
@@ -41,6 +33,37 @@ class RAGEngine:
                     print("⚠️  No documents found in data directory")
         except Exception as e:
             print(f"❌ Error initializing vector store: {e}")
+    
+    def _call_cerebras_api(self, messages: List[Dict]) -> str:
+        """Make direct API call to Cerebras"""
+        try:
+            url = f"{config.CEREBRAS_API_BASE}/chat/completions"
+            
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {config.CEREBRAS_API_KEY}"
+            }
+            
+            data = {
+                "model": config.MODEL_NAME,
+                "messages": messages,
+                "temperature": config.TEMPERATURE,
+                "max_tokens": 2000,
+                "stream": False
+            }
+            
+            response = requests.post(url, headers=headers, json=data, timeout=60)
+            response.raise_for_status()
+            
+            result = response.json()
+            return result["choices"][0]["message"]["content"]
+            
+        except requests.exceptions.RequestException as e:
+            raise Exception(f"Cerebras API error: {str(e)}")
+        except KeyError as e:
+            raise Exception(f"Unexpected response format from Cerebras API: {str(e)}")
+        except Exception as e:
+            raise Exception(f"Error calling Cerebras API: {str(e)}")
     
     def _retrieve_documents(self, query: str, k: int = 5) -> List[Dict]:
         """Retrieve relevant documents for the query"""
@@ -60,7 +83,7 @@ class RAGEngine:
             return []
     
     def _generate_answer(self, query: str, documents: List[Dict]) -> Dict[str, Any]:
-        """Generate answer based on retrieved documents"""
+        """Generate answer based on retrieved documents using Cerebras API"""
         try:
             if not documents:
                 return {
@@ -78,36 +101,39 @@ class RAGEngine:
             
             context = "\n\n".join(context_parts)
             
-            # Create prompt for answer generation
-            system_prompt = """You are a helpful assistant that provides accurate answers based on the provided context.
-            Always base your answers strictly on the provided documents.
-            Cite your sources using the source numbers like [1], [2], etc. when referencing specific information.
-            If the context doesn't contain enough information to answer the question, say so clearly.
-            
-            Important guidelines:
-            - Be concise and factual
-            - Only use information from the provided sources
-            - Always cite your sources
-            - If you're unsure, say you don't know based on the available information"""
-            
-            user_prompt = f"""Question: {query}
-
-            Relevant Context:
-            {context}
-
-            Please provide a comprehensive answer based on the context above. Include citations for all factual information.
-
-            Answer:"""
-            
+            # Prepare messages for Cerebras API
             messages = [
-                SystemMessage(content=system_prompt),
-                HumanMessage(content=user_prompt)
+                {
+                    "role": "system",
+                    "content": """You are a helpful assistant that provides accurate answers based on the provided context.
+                    Always base your answers strictly on the provided documents.
+                    Cite your sources using the source numbers like [1], [2], etc. when referencing specific information.
+                    If the context doesn't contain enough information to answer the question, say so clearly.
+                    
+                    Important guidelines:
+                    - Be concise and factual
+                    - Only use information from the provided sources
+                    - Always cite your sources
+                    - If you're unsure, say you don't know based on the available information"""
+                },
+                {
+                    "role": "user",
+                    "content": f"""Question: {query}
+
+                    Relevant Context:
+                    {context}
+
+                    Please provide a comprehensive answer based on the context above. Include citations for all factual information.
+
+                    Answer:"""
+                }
             ]
             
-            response = self.llm.invoke(messages)
+            # Call Cerebras API directly
+            answer = self._call_cerebras_api(messages)
             
             return {
-                "answer": response.content,
+                "answer": answer,
                 "sources": sources_info
             }
             
