@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Main entry point for the Agentic RAG Document Search System
+Main entry point for the RAG Document Search System
 """
 
 import argparse
@@ -12,7 +12,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 
 def main():
     """Main entry point"""
-    parser = argparse.ArgumentParser(description="Agentic RAG Document Search System")
+    parser = argparse.ArgumentParser(description="RAG Document Search System")
     parser.add_argument(
         '--mode', 
         choices=['cli', 'web'], 
@@ -49,31 +49,13 @@ def main():
 
 def command_line_interface():
     """Run the system in command line mode"""
-    print("🔍 Agentic RAG Document Search - CLI Mode")
+    print("🔍 RAG Document Search - CLI Mode")
     print("=" * 50)
     
     try:
-        from src.vectorstore import VectorStoreManager
-        from src.agent import DocumentSearchAgent
+        from src.rag_engine import RAGEngine
         
-        vector_manager = VectorStoreManager()
-        
-        # Check if vector store exists
-        if os.path.exists(vector_manager.config.CHROMA_PERSIST_DIR):
-            print("Loading existing vector store...")
-            vector_manager.load_existing_vector_store()
-        else:
-            print("Creating new vector store from documents...")
-            documents = vector_manager.load_documents()
-            if documents:
-                vector_manager.create_vector_store(documents)
-                print(f"✅ Vector store created with {len(documents)} documents")
-            else:
-                print("⚠️  Warning: No documents found in data directory.")
-                print("Please add some PDF or text files to the data/ folder.")
-                return
-        
-        agent = DocumentSearchAgent(vector_manager)
+        rag_engine = RAGEngine()
         
         print("\n✅ System ready! Type your questions below (or 'quit' to exit):")
         print("-" * 50)
@@ -89,10 +71,14 @@ def command_line_interface():
                 continue
             
             print("🔄 Processing...")
-            result = agent.process_query(query)
+            result = rag_engine.process_query(query)
             
             if result["success"]:
                 print(f"\n🤖 Answer: {result['answer']}")
+                if result['sources']:
+                    print(f"\n📚 Sources:")
+                    for source in result['sources']:
+                        print(f"  • {source}")
                 print("-" * 50)
             else:
                 print(f"\n❌ Error: {result['answer']}")
