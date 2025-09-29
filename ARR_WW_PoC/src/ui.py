@@ -25,6 +25,7 @@ class StreamlitUI:
         st.markdown("""
         This intelligent assistant can search through your documents and provide 
         well-grounded answers with proper citations using Retrieval-Augmented Generation.
+        **Using Cerebras Llama-3.3-70b model directly via Cerebras API**
         """)
     
     def initialize_system(self):
@@ -63,7 +64,7 @@ class StreamlitUI:
                     st.metric("Document Chunks", "Unknown")
             
             st.header("⚙️ Settings")
-            st.info("Using RAG with Cerebras Llama-3.3-70b")
+            st.info("Using Cerebras Llama-3.3-70b via direct API")
             
             st.header("💡 Usage Tips")
             st.markdown("""
@@ -86,7 +87,7 @@ class StreamlitUI:
         # Initialize chat history in session state
         if "messages" not in st.session_state:
             st.session_state.messages = [
-                {"role": "assistant", "content": "Hello! I'm your RAG document search assistant. Ask me anything about the documents in your knowledge base."}
+                {"role": "assistant", "content": "Hello! I'm your RAG document search assistant using Cerebras API. Ask me anything about the documents in your knowledge base."}
             ]
         
         # Display chat messages
