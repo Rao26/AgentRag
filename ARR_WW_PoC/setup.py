@@ -24,40 +24,46 @@ def setup_environment():
     if not os.path.exists('data'):
         print("📁 Creating data directory...")
         os.makedirs('data')
-        print("✅ Created data directory. Please add your PDF/text files here.")
+        print("✅ Created data directory.")
     
-    # Create sample data files
-    sample_files = {
-        'sample1.txt': """Artificial Intelligence Research Overview
+    # Create instruction file for the Bhutan climate change PDF
+    instruction_content = """RAG System Setup Instructions
 
-Artificial Intelligence (AI) refers to the simulation of human intelligence in machines that are programmed to think like humans and mimic their actions. The term may also be applied to any machine that exhibits traits associated with a human mind such as learning and problem-solving.
+This RAG system is configured to work with the Bhutan climate change document:
 
-Key areas of AI research include machine learning, natural language processing, computer vision, and robotics. Machine learning algorithms use statistical techniques to give computers the ability to learn from data without being explicitly programmed.
+"2011-NEC-climate_change-pub.pdf" - National Environment Commission, Royal Government of Bhutan
 
-Recent advancements in deep learning have significantly improved AI capabilities in areas like image recognition, speech recognition, and natural language understanding.""",
-        
-        'sample2.txt': """Machine Learning Implementation Guide
+To use this system:
 
-Machine Learning (ML) is a subset of artificial intelligence that focuses on building systems that learn from data. The three main types of machine learning are supervised learning, unsupervised learning, and reinforcement learning.
+1. Place the PDF file '2011-NEC-climate_change-pub.pdf' in the data/ directory
+2. The document contains comprehensive information about:
+   - Climate change science and evidence
+   - Greenhouse gases and their effects
+   - Impacts on Bhutan and Himalayan region
+   - Glacial retreat and water resources
+   - Adaptation and mitigation strategies
+   - Bhutan's climate policies and carbon neutrality commitment
 
-Supervised learning uses labeled datasets to train algorithms for classification or regression tasks. Common algorithms include linear regression, decision trees, and support vector machines.
+3. Once the PDF is placed in the data/ directory, run the system using:
+   - Streamlit: streamlit run src/main.py
+   - CLI: python src/main.py --mode cli
 
-Best practices for ML implementation include proper data preprocessing, feature engineering, model validation, and continuous monitoring. Data quality is critical for successful ML deployments."""
-    }
-    
-    for filename, content in sample_files.items():
-        filepath = os.path.join('data', filename)
-        if not os.path.exists(filepath):
-            print(f"📄 Creating sample file: {filename}")
-            with open(filepath, 'w', encoding='utf-8') as f:
-                f.write(content)
+The system will process this document and allow you to ask questions about climate change, Bhutan's environment, glacial lakes, and related topics.
+"""
+
+    instruction_file = os.path.join('data', 'INSTRUCTIONS.md')
+    if not os.path.exists(instruction_file):
+        print("📄 Creating instruction file...")
+        with open(instruction_file, 'w', encoding='utf-8') as f:
+            f.write(instruction_content)
     
     print("\n✅ Setup completed!")
     print("\n📋 Next steps:")
     print("1. Edit the .env file and add your CEREBRAS_API_KEY")
-    print("2. Add your PDF/text files to the data/ directory")
+    print("2. Add '2011-NEC-climate_change-pub.pdf' to the data/ directory")
     print("3. Run: streamlit run src/main.py")
     print("4. Or run CLI: python src/main.py --mode cli")
+    print("\n📚 This system is specifically configured for the Bhutan climate change document.")
 
 if __name__ == "__main__":
     setup_environment()
