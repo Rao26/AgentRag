@@ -13,7 +13,7 @@ class Config:
     CEREBRAS_API_BASE = "https://api.cerebras.ai/v1"
     
     # Model configuration
-    MODEL_NAME = "gpt-oss-120b"
+    MODEL_NAME = "llama-3.3-70b"
     EMBEDDING_MODEL = "sentence-transformers/all-mpnet-base-v2"
     
     # Vector store configuration
@@ -24,9 +24,10 @@ class Config:
     CHUNK_SIZE = 1000
     CHUNK_OVERLAP = 200
     
-    # Agent configuration
+    # RAG configuration
     MAX_CONTEXT_LENGTH = 4000
     TEMPERATURE = 0.1
+    RETRIEVAL_COUNT = 5  # Number of documents to retrieve
     
     @classmethod
     def validate_config(cls):
