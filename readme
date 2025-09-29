@@ -1,11 +1,8 @@
-# Agentic RAG: AI Assistant for Document Search using Agents
-
-A Proof of Concept (PoC) for an intelligent document search assistant that uses agentic workflows to break down queries, search documents, summarize context, and generate grounded answers with proper citations.
+# RAG Application: Assistant for Document Search using RAG
 
 ## Features
 
 - **Intelligent Document Search**: Vector-based search using Chroma DB
-- **Agentic Workflow**: Breaks down queries into search → summarize → answer steps
 - **Grounded Responses**: Answers include citations to source documents
 - **Streamlit Web Interface**: User-friendly web UI for interaction
 - **Cerebras Integration**: Uses Cerebras gpt-oss-120b model via LangChain
@@ -28,14 +25,18 @@ A Proof of Concept (PoC) for an intelligent document search assistant that uses 
 
 ### 2. Installation
 
-```bash
-# Clone or create the project directory
-mkdir agentic-rag-poc
-cd agentic-rag-poc
-
 # Create virtual environment
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 # Install dependencies
 pip install -r requirements.txt
+
+# Run setup.py
+python setup.py
+
+# Run run.py
+python run.py
+
+# Use Strimelit to run the application
+streamlit run src/main.py
